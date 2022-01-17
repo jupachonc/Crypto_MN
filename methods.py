@@ -23,3 +23,44 @@ def Gauss_Jordan(A):
     
     y = A[:,n] #vetor com resultados
     return y
+
+
+##############################################
+
+#Método de Gauss-Seidel
+
+# Defining our function as seidel which takes 3 arguments
+# as A matrix, Solution and B matrix
+
+def seidel(a, x ,b):
+	#Finding length of a(5)	
+	n = len(a)				
+	# for loop for 5 times as to calculate x, y , z
+	for j in range(0, n):		
+		# temp variable d to store b[j]
+		d = b[j]				
+		
+		# to calculate respective xi, yi, zi
+		for i in range(0, n):	
+			if(j != i):
+				d-=a[j][i] * x[i]
+		# updating the value of our solution		
+		x[j] = d / a[j][j]
+	# returning our updated solution		
+	return x	
+
+		
+n = 5
+				
+x = [0, 0, 0, 0, 0]						
+a = np.random.randint(1000, size=(5, 5)) 
+b = np.random.randint(10, size=(5)) 
+
+sol = []
+
+for i in range(0, 25):
+  x = seidel(a, x, b)
+  if i == 24:
+    sol = x
+
+print(sol)
