@@ -1,134 +1,132 @@
 import numpy as np
+import sys
 
-def Gauss_Jordan(A):
-    """
-    O algoritmo de Gauss-Jordan serve para resolver sistemas lineares de forma analítica.
-    Não apresenta problemas de divergência, resolvendo todos casos com solução possível e única.
-    O primeiro grande ciclo escalona a primeira metade. O primeiro ciclo interno divide pelos pivôs.
-    O segundo ciclo é a multiplicação pelo elemento pivô, de modo a zerar
-    O ciclo maior inicia pela primeira coluna e se repete até a penúltima coluna
-    """
-    n = len(A)
-    #primeira metade do escalonamento
-    for j in range(0,n): #correndo ao longo das colunas
-        for i in range(j,n):
-            A[i,:] = A[i,:]/A[i,i] #divisão pelos pivôs
-        for i in range(j+1,n):
-            A[i,:] = -A[j,:]*A[i,j] + A[i,:]
+# LU ===========================================================
+
+MAX = 100
+ 
+ 
+def luDecomposition(mat, n):
+ 
+    lower = [[0 for x in range(n)]
+             for y in range(n)]
+    upper = [[0 for x in range(n)]
+             for y in range(n)]
+ 
+    # Decomposing matrix into Upper
+    # and Lower triangular matrix
+    for i in range(n):
+ 
+        # Upper Triangular
+        for k in range(i, n):
+ 
+            # Summation of L(i, j) * U(j, k)
+            sum = 0
+            for j in range(i):
+                sum += (lower[i][j] * upper[j][k])
+ 
+            # Evaluating U(i, k)
+            upper[i][k] = mat[i][k] - sum
+ 
+        # Lower Triangular
+        for k in range(i, n):
+            if (i == k):
+                lower[i][i] = 1  # Diagonal as 1
+            else:
+ 
+                # Summation of L(k, j) * U(j, i)
+                sum = 0
+                for j in range(i):
+                    sum += (lower[k][j] * upper[j][i])
+ 
+                # Evaluating L(k, i)
+                lower[k][i] = float((mat[k][i] - sum) /
+                                  upper[i][i])
+ 
+    # setw is for displaying nicely
+    print("Lower Triangular\t\t\t\tUpper Triangular")
+ 
+    # Displaying the result :
+    for i in range(n):
+ 
+        # Lower
+        for j in range(n):
+            print("{:0.2f}".format(lower[i][j]), end="\t")
+        print("", end="\t")
+ 
+        # Upper
+        for j in range(n):
+            print("{:0.2f}".format(upper[i][j]), end="\t")
+        print("")
+    return lower, upper
+ 
+def lu_method(gmtx, x):
+    n = len(x)
+    lower, upper = luDecomposition(gmtx, n)
+
+    l_sol = [1] * n
+    for i in range(n):
+        sum = 0
+        line = lower[i]
+        for j in range(i+1):
+            if i != j:
+                sum += line[j]*l_sol[j]
+        l_sol[i] = (float(x[i])- sum)/line[i]
+
+    u_sol = [1] * n
+    for i in range(n-1, -1, -1):
+        sum = 0
+        line = upper[i]
+        for j in range(n-1, -1, -1):
+            if i != j:
+                sum += line[j]*u_sol[j]
+        u_sol[i] = (float(l_sol[i])-sum)/line[i]    
+
+    print("\nSolución L\n")
+    print([round(x, 2) for x in l_sol])
+    print("\n\nSolución U\n")
+    print([round(x, 2) for x in u_sol], end="\n\n")
     
-    #segunda metade do escalonamento    
-    for j in range(1,n):
-        for i in range(1,n):
-            A[n-j-i,:] = A[n-j-i,:] - A[n-j,:]*A[n-j-i,n-j]
-    
-    y = A[:,n] #vetor com resultados
-    return y
+
+    return [round(x) for x in u_sol]
 
 
+def Gauss_Jordan(gmtx, x_):
+    # Reading number of unknowns
+    n =  len(x_)
 
+    # Making numpy array of n x n+1 size and initializing 
+    # to zero for storing augmented matrix
+    a = np.zeros((n,n+1))
 
-##############################################
+    # Making numpy array of n size and initializing 
+    # to zero for storing solution vector
+    x = np.zeros(n)
 
-#Método de Gauss-Seidel
+    # Reading augmented matrix coefficients
+    a = np.concatenate((gmtx, x_), axis = 1)
 
-# Defining our function as seidel which takes 3 arguments
-# as A matrix, Solution and B matrix
+    # Applying Gauss Elimination
+    for i in range(n):
+        if a[i][i] == 0.0:
+            print('Divide by zero detected!')
+            return [0] * n
+            
+        for j in range(i+1, n):
+            ratio = a[j][i]/a[i][i]
+            
+            for k in range(n+1):
+                a[j][k] = a[j][k] - ratio * a[i][k]
 
-def seidel(a, x ,b):
-	#Finding length of a(5)	
-	n = len(a)				
-	# for loop for 5 times as to calculate x, y , z
-	for j in range(0, n):		
-		# temp variable d to store b[j]
-		d = b[j]				
-		
-		# to calculate respective xi, yi, zi
-		for i in range(0, n):	
-			if(j != i):
-				d-=a[j][i] * x[i]
-		# updating the value of our solution		
-		x[j] = d / a[j][j]
-	# returning our updated solution		
-	return x	
+    # Back Substitution
+    x[n-1] = a[n-1][n]/a[n-1][n-1]
 
-		
-n = 5
-				
-x = [0, 0, 0, 0, 0]						
-a = np.random.randint(1000, size=(5, 5)) 
-b = np.random.randint(10, size=(5)) 
+    for i in range(n-2,-1,-1):
+        x[i] = a[i][n]
+        
+        for j in range(i+1,n):
+            x[i] = x[i] - a[i][j]*x[j]
+        
+        x[i] = x[i]/a[i][i]
 
-sol = []
-
-for i in range(0, 25):
-  x = seidel(a, x, b)
-  if i == 24:
-    sol = x
-
-print(sol)
-
-
-
-
-################################################################
-
-#Método de Jacobi
-
-#! /usr/bin/python3.3
-import numpy as np
-from math import sqrt, copysign
-
-
-def spherical_matrix_norm(matrix):
-    """ Returns sum of square of elements in matrix: for diagonal, not diagonal and total """
-    diag_sum = sum([matrix[i, i] ** 2 for i in range(len(matrix))])
-    non_diag_sum = sum([matrix[i, j] ** 2 for i in range(len(matrix)) for j in range(len(matrix)) if not i == j])
-    total_sum = sum([matrix[i, j] ** 2 for i in range(len(matrix)) for j in range(len(matrix))])
-    return (diag_sum, non_diag_sum, total_sum)
-
-
-def max_non_diag_elem(matrix):
-    """ Returns indexes (i,j) of max non-diagonal element """
-    matrix = np.array(matrix).tolist()
-    max_element_value = max([max(x[:k] + x[k + 1:]) for k, x in enumerate(matrix)])
-    indexes = [(subarray.index(max_element_value), i) for i, subarray in enumerate(matrix) if max_element_value in subarray and i != subarray.index(max_element_value)]
-    return indexes[0]
-
-
-def matrix_rotarion(matrix, max_i, max_j):
-    """ Indexes of max non-diagonal element given, transforms matrix for annulment of this element"""
-    res_matrix = np.identity(len(matrix))
-    mu = 2 * matrix[max_i, max_j] / (matrix[max_i, max_i] - matrix[max_j, max_j])
-    c = sqrt(0.5 * (1 + 1 / sqrt(1 + mu ** 2)))
-    s = sqrt(0.5 * (1 - 1 / sqrt(1 + mu ** 2))) * copysign(1, mu)
-    res_matrix[max_i, max_i] = c
-    res_matrix[max_j, max_j] = c
-    res_matrix[max_i, max_j] = s
-    res_matrix[max_j, max_i] = -s
-    return res_matrix
-
-
-def transform_matrix(matrix, eps):
-    """ Transformes matrix according to Jacobi method """
-    while (matrix[max_non_diag_elem(matrix)[0],max_non_diag_elem(matrix)[1]] > eps):        
-        elem_i, elem_j = max_non_diag_elem(matrix)
-        rotation_step = matrix_rotarion(matrix, elem_i, elem_j)
-        matrix = rotation_step.dot(matrix).dot(rotation_step.transpose())  
-        # printed results for report
-        # print('spherical matrix norm (diag_sum, non_diag_sum, total_sum)\n ',spherical_matrix_norm(matrix))
-        # print('T(i,j) \n', rotation_step,'\n')
-        # print('T(i,j)-transposed \n', rotation_step.transpose(),'\n')    
-    return matrix
-
-
-def find_eigenvalues(matrix):
-    """ Returns eigenvalues - works for already tranformed matrix """
-    return ([matrix[i,i] for i in range(len(matrix))])
-
-
-print("NCM: Assignment #4: Finding eigenvalues - Jacobi eigenvalue algorithm \n")
-eps = 0.00001
-A = np.random.randint(1000, size=(5, 5)) 
-print(' Start with matrix: \n', A, '\n Precision e = ', eps)	
-tranformed = transform_matrix(A,eps)	
-print ('\n Result: \n',find_eigenvalues(tranformed))
+    return [round(x_i) for x_i in x]
