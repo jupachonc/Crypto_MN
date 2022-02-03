@@ -36,8 +36,11 @@ def find_system():
         y = Gauss_Jordan(gmtx, x)
         y_2 = lu_method(gmtx, x)
 
-        print(y)
+        print("================== Soluciones ==================================================\n\n")
+        print("LU Method ======================================================================\n")
         print(y_2)
+        print("\nGauss Method ======================================================================\n")
+        print(y)
 
         zeros = not (0 in y or 0 in y_2)
         equal = y == y_2
