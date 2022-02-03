@@ -1,5 +1,4 @@
 import numpy as np
-from rsa import PrivateKey
 from scipy.linalg import circulant
 from methods import *
 from utils import *
