@@ -25,7 +25,7 @@ while option != 4:
 
     elif option == 2:
         cc_number = input('Ingrese el número de la tarjeta: \n\n')
-        exp_date = input('Ingrese la fecha de vencimiento de l a tarjeta \n MMAA: \n\n')
+        exp_date = input('Ingrese la fecha de vencimiento de la tarjeta \nMMAA: \n\n')
         cvv2 = input('Ingrese el código de seguridad CVV2 que se encuentra al respaldo de su tarjeta:\n\n')
         dt = encode_matrix(cc_number, exp_date, cvv2)
         data = encrypt(dt, keys["Public_Key"])

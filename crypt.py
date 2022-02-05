@@ -106,6 +106,9 @@ def decrypt(encrypted_data, privateKey):
     #Read Private Key
     l_c = privateKey["l_c"]
     y_c = privateKey["y_c"]
+    
+    print("\n\nDecrypting Data Using Private key\n\n")
+    print(privateKey)
 
     #Decrypt
     auxs = np.matmul(np.matmul(l_c, d_1), y_c)
